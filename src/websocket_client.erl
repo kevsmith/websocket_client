@@ -25,7 +25,7 @@ start_link(URL, Handler, HandlerArgs) ->
 start_link(URL, Handler, HandlerArgs, AsyncStart) when is_boolean(AsyncStart) ->
     start_link(URL, Handler, HandlerArgs, [{async_start, AsyncStart}]);
 start_link(URL, Handler, HandlerArgs, Opts) when is_binary(URL) ->
-	start_link(erlang:binary_to_list(URL), Handler, HandlerArgs, Opts);
+        start_link(erlang:binary_to_list(URL), Handler, HandlerArgs, Opts);
 start_link(URL, Handler, HandlerArgs, Opts) when is_list(Opts) ->
     case http_uri:parse(URL, [{scheme_defaults, [{ws,80},{wss,443}]}]) of
         {ok, {Protocol, _, Host, Port, Path, Query}} ->
@@ -381,8 +381,9 @@ retrieve_frame(WSReq, HandlerState, Opcode, Len, Data, Buffer) ->
                 websocket_close(WSReq, HandlerState, {handler, Reason})
             end;
         _ ->
+            [CleanedPayload|_] = binary:split(FullPayload, <<0>>),
             try Handler:websocket_handle(
-                                {OpcodeName, FullPayload},
+                                {OpcodeName, CleanedPayload},
                                 WSReq, HandlerState) of
                 HandlerResponse ->
                     handle_response(websocket_req:remaining(undefined, WSReq),
